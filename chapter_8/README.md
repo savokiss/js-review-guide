@@ -26,3 +26,91 @@
 - 使用`call()` 和 `apply()`
 - 两个方法都允许显式指定调用所需的 this 值，也就是说，任何函数可以作为任何对象的方法来调用，哪怕这个函数不是那个对象的方法。
 - `call`的实参是依次传入，`apply`的实参是数组
+
+# 8.6 闭包
+- 函数的执行依赖于变量作用域，这个作用域是在函数定义时决定的，而不是函数调用时决定的。为了实现这种词法作用域，JavaScripot函数对象的内部状态不仅包括函数的代码逻辑，还必须引用当前的作用域链。
+- 函数对象可以通过作用域链相互关联起来，函数体内部的变量都可以保存在函数作用域内，这种特性在计算机科学文献中称为“闭包”
+- 简言之，闭包的这个特性强大到让人吃惊：它们可以捕捉到局部变量（和参数），并一直保存下来，看起来像这些变量绑定到了在其中定义它们的外部函数。
+- 理解闭包：函数定义时的作用域链到函数执行时依然有效
+- 我们将作用域链描述为一个对象列表，不是绑定的栈。每次调用JavaScript函数的时候，都会为之创建一个新的对象用来保存局部变量，把这个对象添加至作用域链中。当函数返回的时候，就从作用域链中将这个绑定变量的对象删除。如果不存在嵌套的函数，也没有其他引用指向这个绑定对象，它就会被当做垃圾回收掉。如果定义了嵌套的函数，每个嵌套的函数都各自对应一个作用域链，并且这个作用域链指向一个变量绑定对象。
+  ```javascript
+  function counter() {
+    var n = 0;
+    return {
+      count: function() { return n++; },
+      reset: function() { n = 0; }
+    }
+  }
+  var c = counter(),
+      d = counter(); // 创建两个计数器
+  c.count() // => 0
+  d.count() // => 0: 它们互不干扰
+  c.reset() // reset() 和 count() 方法共享状态
+  c.count() // => 0: 因为我们重置了c
+  d.count() // => 1: 而没有重置d
+  ```
+
+# 8.7 函数属性、方法和构造函数
+## 8.7.3 call() 方法和 apply() 方法
+- AOP 函数
+  ```javascript
+  // 将对象o中名为m() 的方法替换为另一个方法
+  // 可以在调用原始的方法之前和之后记录日志消息
+  function trace(o, m) {
+    var original = o[m]; // 在比包中保存原始方法
+    o[m] = function() {  // 定义新的方法
+      console.log(new Date(), 'Entering:', m); // 输出日志消息
+      var result = original.apply(this, arguments); // 调用原始函数
+      console.log(new Date(), 'Exiting:', m);  // 输出日志消息
+      return result; // 返回结果
+    }
+  } 
+  ```
+- trace()函数接收两个参数，一个对象和一个方法名，它将指定的方法替换为一个新方法，这个新方法是“包裹”原始方法的另一个泛函数。这种动态修改已有方法的做法有时称做“monkey-patching”。
+
+## 8.7.4 bind() 方法
+- ECMAScript 5中的bind()方法不仅仅是将函数绑定至一个对象，它还附带一些其他应用：除了第一个实参之外，传入bind()的实参也会绑定至this，这个附带的应用是一种常见的函数式编程技术，有时也被称为“柯里化”（currying）。参照下面这个例子中的bind()方法的实现：
+  ```javascript
+  var sum = function(x,y) { return x + y }; //返回两个实参的和值
+  // 创建一个类似sum的新函数，但this的值绑定到null
+  // 并且第一个参数绑定到1，这个新的函数期望只传入一个实参
+  var succ = sum.bind(null, 1);
+  succ(2) // => 3: x绑定到1，并传入2作为实参y
+  function f(y,z) { return this.x + y + z }; //另外一个做累加计算的函数
+  var g = f.bind({x:1}, 2); // 绑定this和y
+  g(3) // => 6: this.x 绑定到1, y绑定到2, z绑定到3
+  ```
+
+# 8.8 函数式编程
+## 8.8.2 高阶函数
+```javascript
+// 这个高阶函数返回一个新的函数，这个新函数将它的实参传入f()
+// 并返回f的返回值的逻辑非
+function not(f) {    
+  return function() { //返回一个新的函数        
+    var result = f.apply(this, arguments); // 调用f()        
+    return !result; // 对结果求反    
+  };
+}
+var even = function(x) { // 判断a是否为偶数的函数   
+  return x % 2 === 0;
+};
+var odd = not(even); //一个新函数，所做的事情和even()相反
+[1, 1, 3, 5, 5].every(odd); // => true: 每个元素都是奇数
+```
+
+## 8.8.4 记忆
+- 下面的代码展示了一个高阶函数，memorize()接收一个函数作为实参，并返回带有记忆能力的函数。
+  ```javascript
+  // 返回f()的带有记忆功能的版本
+  // 只有当f()的实参的字符串表示都不相同时它才会工作
+  function memorize(f) {    
+    var cache = {}; //将值保存在闭包内    
+    return function() {        
+      // 将实参转换为字符串形式，并将其用做缓存的键        
+      var key = arguments.length + Array.prototype.join.call(arguments, ",");        
+      if (key in cache) return cache[key];        
+      else return cache[key] = f.apply(this, arguments);    
+    };
+  }
+  ```
