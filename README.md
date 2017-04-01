@@ -1,4 +1,5 @@
 # js-review-guide
+
 review js knowledge
 > 《JavaScript权威指南》要点笔记
 
@@ -6,3 +7,4 @@ review js knowledge
 - [第七章 数组](chapter_7)
 - [第八章 函数](chapter_8)
 - [第九章 类和模块](chapter_9)
+- [第十章 正则表达式的模式匹配](chapter_10)
