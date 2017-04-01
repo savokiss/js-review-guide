@@ -28,6 +28,3 @@
 
 # 10.2 用于模式匹配的 String 方法
 - String.prototype.search()方法不支持全局检索，因为它忽略正则表达式参数中的修饰符g
-
-# 10.3 RegExp 对象
-## 10.3.1 Reg
