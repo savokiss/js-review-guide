@@ -5,3 +5,4 @@ review js knowledge
 ## TOC
 - [第七章 数组](chapter_7)
 - [第八章 函数](chapter_8)
+- [第九章 类和模块](chapter_9)
