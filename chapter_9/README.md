@@ -17,7 +17,7 @@
   o.constructor === F // => true，constructor属性指代这个类
   ```
 
-# 9.6 JavaScriopt 中的面向对象技术
+# 9.6 JavaScriopft 中的面向对象技术
 ## 9.6.3 标准转换方法
 - 如果一个对象有toJSON()方法，JSON.stringify()并不会对传入的对象做序列化操作，而会调用toJSON()来执行序列化操作（序列化的值可能是原始值也可能是对象）。
 - 如果将对象用于JavaScript的关系比较运算符，比如“<”和“<=”，JavaScript会首先调用对象的valueOf()方法，如果这个方法返回一个原始值，则直接比较原始值。
